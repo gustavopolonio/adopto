@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-repository'
 import { UpdatePetUseCase } from './update-pet'
+import { ResourceNotFoundError } from './errors/resource-not-found-error'
 
 let orgsRepository: InMemoryOrgsRepository
 let petsRepository: InMemoryPetsRepository
@@ -55,5 +56,31 @@ describe('Update pet use case', () => {
         name: 'Pet 1 updated',
       }),
     )
+  })
+
+  it('should not be able to update an unexisting pet', async () => {
+    const org = await orgsRepository.create({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password_hash: '123456',
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    await expect(
+      sut.execute({
+        id: 'non-existing-pet-id',
+        name: 'Pet 1 updated',
+        description: 'Pet 1 description updated',
+        ageInMonths: 12,
+        size: 'SMALL',
+        energyLevel: 'LOW',
+        photos: ['photo1.jpg', 'photo2.jpg'],
+        adoptionRequirements: ['Requirement 2'],
+        orgId: org.id,
+      }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 })
