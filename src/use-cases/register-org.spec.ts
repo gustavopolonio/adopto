@@ -25,4 +25,20 @@ describe('Register org use case', () => {
     expect(org.latitude).not.toBeNull()
     expect(org.longitude).not.toBeNull()
   })
+
+  it('should be able to register an org with unknown address', async () => {
+    const { org } = await sut.execute({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password: '123456',
+      zipCode: 'xxxxx-xxx',
+      address: 'Unknown address, xx',
+      city: 'Unknown city',
+      whatsapp: '16 99399-0990',
+    })
+
+    expect(org.id).toEqual(expect.any(String))
+    expect(org.latitude).toBeNull()
+    expect(org.longitude).toBeNull()
+  })
 })
