@@ -43,4 +43,25 @@ describe('Authenticate org use case', () => {
       }),
     ).rejects.toBeInstanceOf(InvalidCredentialsError)
   })
+
+  it('should not be able to authenticate with wrong password', async () => {
+    const email = 'org1@test.test'
+
+    await orgsRepository.create({
+      name: 'Org 1',
+      email,
+      password_hash: await hash('123456', 6),
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    await expect(
+      sut.execute({
+        email,
+        password: '000000',
+      }),
+    ).rejects.toBeInstanceOf(InvalidCredentialsError)
+  })
 })
