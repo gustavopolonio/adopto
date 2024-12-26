@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { compare } from 'bcryptjs'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { UpdateOrgUseCase } from './update-org'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
@@ -91,5 +92,34 @@ describe('Update org use case', () => {
         whatsapp: '16 99399-0990',
       }),
     ).rejects.toBeInstanceOf(ResourceNotFoundError)
+  })
+
+  it('should be able to hash org password upon org update', async () => {
+    const password = '000000'
+
+    const createdOrg = await orgsRepository.create({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password_hash: '123456',
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    const { org } = await sut.execute({
+      id: createdOrg.id,
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password,
+      zipCode: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    const isPasswordCorrectlyHashed = await compare(password, org.password_hash)
+
+    expect(isPasswordCorrectlyHashed).toBe(true)
   })
 })
