@@ -1,8 +1,7 @@
-import { Client as GoogleMapsClient } from '@googlemaps/google-maps-services-js'
 import { Org } from '@prisma/client'
 import { hash } from 'bcryptjs'
 import { OrgsRepository } from '@/repositories/orgs-repository'
-import { env } from '@/env'
+import { geocodeAddress } from '@/utils/geocode-address'
 import { UserAlreadyExistsError } from './errors/user-already-exists-error'
 
 interface RegisterOrgUseCaseRequest {
@@ -38,14 +37,11 @@ export class RegisterOrgUseCase {
 
     const passwordHash = await hash(password, 6)
 
-    const mapsClient = new GoogleMapsClient({})
-    const geocodeResponse = await mapsClient.geocode({
-      params: {
-        key: env.GOOGLE_MAPS_API_KEY,
-        address: `${zipCode}, ${address}, ${city}`,
-      },
+    const location = await geocodeAddress({
+      zipCode,
+      address,
+      city,
     })
-    const location = geocodeResponse.data.results[0]?.geometry.location
 
     const org = await this.orgsRepository.create({
       name,

@@ -1,9 +1,8 @@
 import { Org, Prisma } from '@prisma/client'
-import { Client as GoogleMapsClient } from '@googlemaps/google-maps-services-js'
-import { OrgsRepository } from '@/repositories/orgs-repository'
-import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { hash } from 'bcryptjs'
-import { env } from '@/env'
+import { OrgsRepository } from '@/repositories/orgs-repository'
+import { geocodeAddress } from '@/utils/geocode-address'
+import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { UserAlreadyExistsError } from './errors/user-already-exists-error'
 
 interface UpdateOrgUseCaseRequest {
@@ -46,14 +45,11 @@ export class UpdateOrgUseCase {
 
     const passwordHash = await hash(password, 6)
 
-    const mapsClient = new GoogleMapsClient({})
-    const geocodeResponse = await mapsClient.geocode({
-      params: {
-        key: env.GOOGLE_MAPS_API_KEY,
-        address: `${zipCode}, ${address}, ${city}`,
-      },
+    const location = await geocodeAddress({
+      zipCode,
+      address,
+      city,
     })
-    const location = geocodeResponse.data.results[0]?.geometry.location
 
     const orgUpdated = await this.orgsRepository.save({
       ...org,
