@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { compare } from 'bcryptjs'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { RegisterOrgUseCase } from './register-org'
 
@@ -40,5 +41,23 @@ describe('Register org use case', () => {
     expect(org.id).toEqual(expect.any(String))
     expect(org.latitude).toBeNull()
     expect(org.longitude).toBeNull()
+  })
+
+  it('should be able to hash org password upon org creation', async () => {
+    const password = '123456'
+
+    const { org } = await sut.execute({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password,
+      zipCode: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    const isPasswordCorrectlyHashed = await compare(password, org.password_hash)
+
+    expect(isPasswordCorrectlyHashed).toBe(true)
   })
 })
