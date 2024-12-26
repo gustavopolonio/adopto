@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { compare } from 'bcryptjs'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { RegisterOrgUseCase } from './register-org'
+import { UserAlreadyExistsError } from './errors/user-already-exists-error'
 
 let sut: RegisterOrgUseCase
 
@@ -59,5 +60,29 @@ describe('Register org use case', () => {
     const isPasswordCorrectlyHashed = await compare(password, org.password_hash)
 
     expect(isPasswordCorrectlyHashed).toBe(true)
+  })
+
+  it('should not be able to register an org with an existing email', async () => {
+    await sut.execute({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password: '123456',
+      zipCode: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    await expect(
+      sut.execute({
+        name: 'Org 1',
+        email: 'org1@test.test',
+        password: '123456',
+        zipCode: '13566-583',
+        address: 'Rua Tomaz Antonio Gonzaga, 382',
+        city: 'São Carlos',
+        whatsapp: '16 99399-0990',
+      }),
+    ).rejects.toBeInstanceOf(UserAlreadyExistsError)
   })
 })
