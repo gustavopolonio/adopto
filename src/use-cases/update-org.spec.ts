@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { compare } from 'bcryptjs'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
+import { UserAlreadyExistsError } from './errors/user-already-exists-error'
 import { UpdateOrgUseCase } from './update-org'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
 
@@ -121,5 +122,40 @@ describe('Update org use case', () => {
     const isPasswordCorrectlyHashed = await compare(password, org.password_hash)
 
     expect(isPasswordCorrectlyHashed).toBe(true)
+  })
+
+  it('should not be able to update an org email with an existing email', async () => {
+    const firstOrg = await orgsRepository.create({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password_hash: '123456',
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    await orgsRepository.create({
+      name: 'Org 2',
+      email: 'org2@test.test',
+      password_hash: '123456',
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    await expect(
+      sut.execute({
+        id: firstOrg.id,
+        name: 'Org 1',
+        email: 'org2@test.test',
+        password: '123456',
+        zipCode: '13566-583',
+        address: 'Rua Tomaz Antonio Gonzaga, 382',
+        city: 'São Carlos',
+        whatsapp: '16 99399-0990',
+      }),
+    ).rejects.toBeInstanceOf(UserAlreadyExistsError)
   })
 })
