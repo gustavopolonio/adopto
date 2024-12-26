@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { hash } from 'bcryptjs'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { AuthenticateUseCase } from './authenticate'
+import { InvalidCredentialsError } from './errors/invalid-credentials-error'
 
 let orgsRepository: InMemoryOrgsRepository
 let sut: AuthenticateUseCase
@@ -32,5 +33,14 @@ describe('Authenticate org use case', () => {
     })
 
     expect(org.id).toEqual(expect.any(String))
+  })
+
+  it('should not be able to authenticate with wrong email', async () => {
+    await expect(
+      sut.execute({
+        email: 'org1@test.test',
+        password: '123456',
+      }),
+    ).rejects.toBeInstanceOf(InvalidCredentialsError)
   })
 })
