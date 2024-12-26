@@ -72,6 +72,7 @@ export class UpdateOrgUseCase {
       whatsapp,
       latitude: location ? new Prisma.Decimal(location.lat) : null,
       longitude: location ? new Prisma.Decimal(location.lng) : null,
+      updated_at: new Date(),
     })
 
     return { org: orgUpdated }
