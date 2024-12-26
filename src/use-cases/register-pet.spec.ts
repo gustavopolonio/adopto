@@ -3,6 +3,7 @@ import { hash } from 'bcryptjs'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-repository'
 import { RegisterPetUseCase } from './register-pet'
+import { ResourceNotFoundError } from './errors/resource-not-found-error'
 
 let orgsRepository: InMemoryOrgsRepository
 let sut: RegisterPetUseCase
@@ -37,5 +38,20 @@ describe('Register pet use case', () => {
     })
 
     expect(pet.id).toEqual(expect.any(String))
+  })
+
+  it('should not be able to register a pet that is not linked with an org', async () => {
+    await expect(
+      sut.execute({
+        orgId: 'non-existing-org-id',
+        name: 'Pet 1',
+        description: 'Description 1',
+        ageInMonths: 12,
+        size: 'MEDIUM',
+        energyLevel: 'HIGH',
+        photos: ['photo1.jpg'],
+        adoptionRequirements: ['Requirement 1'],
+      }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 })
