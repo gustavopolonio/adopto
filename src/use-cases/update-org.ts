@@ -45,11 +45,19 @@ export class UpdateOrgUseCase {
 
     const passwordHash = await hash(password, 6)
 
-    const location = await geocodeAddress({
-      zipCode,
-      address,
-      city,
-    })
+    let location
+
+    if (
+      zipCode !== org.zip_code ||
+      address !== org.address ||
+      city !== org.city
+    ) {
+      location = await geocodeAddress({
+        zipCode,
+        address,
+        city,
+      })
+    }
 
     const orgUpdated = await this.orgsRepository.save({
       ...org,
