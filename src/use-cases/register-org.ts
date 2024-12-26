@@ -31,6 +31,7 @@ export class RegisterOrgUseCase {
     whatsapp,
   }: RegisterOrgUseCaseRequest): Promise<RegisterOrgUseCaseResponse> {
     const emailAlreadyExists = await this.orgsRepository.findByEmail(email)
+
     if (emailAlreadyExists) {
       throw new UserAlreadyExistsError()
     }

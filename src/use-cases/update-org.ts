@@ -34,11 +34,13 @@ export class UpdateOrgUseCase {
     whatsapp,
   }: UpdateOrgUseCaseRequest): Promise<UpdateOrgUseCaseResponse> {
     const org = await this.orgsRepository.findById(id)
+
     if (!org) {
       throw new ResourceNotFoundError()
     }
 
     const emailAlreadyExists = await this.orgsRepository.findByEmail(email)
+
     if (emailAlreadyExists && emailAlreadyExists.id !== id) {
       throw new UserAlreadyExistsError()
     }
