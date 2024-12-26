@@ -4,7 +4,9 @@
   "description": "Animal adoption app",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/app.ts"
+    "dev": "tsx watch src/app.ts",
+    "test": "vitest run --dir src/use-cases",
+    "test:watch": "vitest --dir src/use-cases"
   },
   "license": "MIT",
   "dependencies": {
@@ -13,6 +15,7 @@
     "bcryptjs": "2.4.3",
     "dotenv": "16.4.7",
     "fastify": "5.2.0",
+    "vite-tsconfig-paths": "5.1.4",
     "zod": "3.24.1"
   },
   "devDependencies": {
@@ -22,6 +25,7 @@
     "eslint": "8.57.1",
     "prisma": "6.1.0",
     "tsx": "4.19.2",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
   }
 }
