@@ -1,18 +1,67 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { hash } from 'bcryptjs'
+import * as fs from 'fs'
+import { Upload } from '@aws-sdk/lib-storage'
+import { MultipartFile } from '@fastify/multipart'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-repository'
 import { RegisterPetUseCase } from './register-pet'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
+import { InMemoryPhotosRepository } from '@/repositories/in-memory/in-memory-photos-repository'
 
+vi.mock('@aws-sdk/lib-storage', () => ({
+  Upload: vi.fn().mockImplementation(() => ({
+    done: vi.fn().mockResolvedValue({ Location: 'mocked-s3-url' }),
+  })),
+}))
+
+vi.mock('fs', () => ({
+  createReadStream: vi
+    .fn()
+    .mockImplementation((filePath) => `stream-of-${filePath}`),
+  readFileSync: vi
+    .fn()
+    .mockImplementation((filePath) =>
+      Buffer.from(`mock-content-of-${filePath}`),
+    ),
+}))
+
+const mockedPhotos = [
+  {
+    file: {
+      filename: 'photo1.jpg',
+      mimetype: 'image/jpeg',
+      encoding: '7bit',
+    } as MultipartFile,
+  },
+  {
+    file: {
+      filename: 'photo2.jpg',
+      mimetype: 'image/jpeg',
+      encoding: '7bit',
+    } as MultipartFile,
+  },
+]
+
+let petsRepository: InMemoryPetsRepository
 let orgsRepository: InMemoryOrgsRepository
+let photosRepository: InMemoryPhotosRepository
 let sut: RegisterPetUseCase
 
 describe('Register pet use case', () => {
   beforeEach(() => {
-    const petRepository = new InMemoryPetsRepository()
+    petsRepository = new InMemoryPetsRepository()
     orgsRepository = new InMemoryOrgsRepository()
-    sut = new RegisterPetUseCase(petRepository, orgsRepository)
+    photosRepository = new InMemoryPhotosRepository()
+    sut = new RegisterPetUseCase(
+      petsRepository,
+      orgsRepository,
+      photosRepository,
+    )
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
   })
 
   it('should be able to register a pet', async () => {
@@ -33,11 +82,23 @@ describe('Register pet use case', () => {
       ageInMonths: 12,
       size: 'MEDIUM',
       energyLevel: 'HIGH',
-      photos: ['photo1.jpg'],
+      photos: mockedPhotos,
       adoptionRequirements: ['Requirement 1'],
     })
 
     expect(pet.id).toEqual(expect.any(String))
+    expect(Upload).toHaveBeenCalledTimes(2)
+    expect(fs.createReadStream).toHaveBeenCalledTimes(2)
+    expect(fs.createReadStream).toHaveBeenCalledWith('photo1.jpg')
+    expect(fs.createReadStream).toHaveBeenCalledWith('photo2.jpg')
+    expect(photosRepository.photos).toEqual([
+      expect.objectContaining({
+        s3_url: 'mocked-s3-url',
+      }),
+      expect.objectContaining({
+        s3_url: 'mocked-s3-url',
+      }),
+    ])
   })
 
   it('should not be able to register a pet that is not linked with an org', async () => {
@@ -49,9 +110,12 @@ describe('Register pet use case', () => {
         ageInMonths: 12,
         size: 'MEDIUM',
         energyLevel: 'HIGH',
-        photos: ['photo1.jpg'],
+        photos: mockedPhotos,
         adoptionRequirements: ['Requirement 1'],
       }),
     ).rejects.toBeInstanceOf(ResourceNotFoundError)
+
+    expect(Upload).toHaveBeenCalledTimes(0)
+    expect(fs.createReadStream).toHaveBeenCalledTimes(0)
   })
 })
