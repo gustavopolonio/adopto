@@ -1,7 +1,15 @@
+import { MultipartFile } from '@fastify/multipart'
 import { EnergyLevel, Pet, Size } from '@prisma/client'
 import { OrgsRepository } from '@/repositories/orgs-repository'
 import { PetsRepository } from '@/repositories/pets-repository'
+import { generateFileHash } from '@/utils/generate-file-hash'
+import { PhotosRepository } from '@/repositories/photos-repository'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
+import { uploadFileToS3 } from '@/utils/upload-file-to-s3'
+
+interface PetPhoto {
+  file: MultipartFile
+}
 
 interface UpdatePetUseCaseRequest {
   id: string
@@ -10,7 +18,7 @@ interface UpdatePetUseCaseRequest {
   ageInMonths: number
   size: Size
   energyLevel: EnergyLevel
-  photos: string[]
+  photos: PetPhoto[]
   adoptionRequirements: string[]
   orgId: string
 }
@@ -23,6 +31,7 @@ export class UpdatePetUseCase {
   constructor(
     private petsRepository: PetsRepository,
     private orgsRepository: OrgsRepository,
+    private photosRepository: PhotosRepository,
   ) {}
 
   async execute({
@@ -55,11 +64,35 @@ export class UpdatePetUseCase {
       age_in_months: ageInMonths,
       size,
       energy_level: energyLevel,
-      photos,
       adoption_requirements: adoptionRequirements,
       org_id: orgId,
       updated_at: new Date(),
     })
+
+    const existingPhotos = await this.photosRepository.getManyByPetId(pet.id)
+
+    for (const photo of photos) {
+      const photoHash = generateFileHash(photo.file.filename)
+
+      const existingPhoto = existingPhotos.find(
+        (existingPhoto) => existingPhoto.hash === photoHash,
+      )
+
+      if (!existingPhoto) {
+        try {
+          const uploadedFile = await uploadFileToS3(photo.file)
+
+          await this.photosRepository.create({
+            s3_url: uploadedFile.Location!,
+            hash: photoHash,
+            pet_id: pet.id,
+          })
+        } catch (error) {
+          console.error('Error uploadind files', error)
+          throw error
+        }
+      }
+    }
 
     return { pet: petUpdated }
   }
