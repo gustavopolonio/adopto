@@ -6,6 +6,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3333),
   DATABASE_URL: z.string().url(),
   GOOGLE_MAPS_API_KEY: z.string(),
+  AWS_ACCESS_KEY: z.string(),
+  AWS_SECRET_ACCESS_KEY: z.string(),
 })
 
 const _env = envSchema.safeParse(process.env)
