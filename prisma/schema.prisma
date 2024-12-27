@@ -26,6 +26,17 @@ model Org {
   @@map("orgs")
 }
 
+model Photo {
+  id     String @id @default(uuid())
+  hash   String
+  s3_url String
+
+  pet    Pet    @relation(fields: [pet_id], references: [id])
+  pet_id String
+
+  @@map("photos")
+}
+
 enum Size {
   SMALL
   MEDIUM
@@ -45,10 +56,11 @@ model Pet {
   age_in_months         Int
   size                  Size
   energy_level          EnergyLevel
-  photos                String[]
   adoption_requirements String[]
   created_at            DateTime    @default(now())
   updated_at            DateTime    @updatedAt
+
+  photos Photo[]
 
   org    Org    @relation(fields: [org_id], references: [id])
   org_id String
