@@ -219,4 +219,69 @@ describe('Get pets from city use case', () => {
       }),
     ])
   })
+
+  it('should be able to get pets from existing city filtered by energy level and size', async () => {
+    const city = 'São Carlos'
+    const energyLevel = 'LOW'
+    const size = 'LARGE'
+
+    const org = await orgsRepository.create({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password_hash: await hash('123456', 6),
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city,
+      whatsapp: '16 99399-0990',
+    })
+
+    // Pet won't be selected
+    await petsRepository.create({
+      org_id: org.id,
+      name: 'Pet 1',
+      description: 'Description 1',
+      age_in_months: 12,
+      size: 'MEDIUM',
+      energy_level: energyLevel,
+      adoption_requirements: ['Requirement 1'],
+    })
+
+    // Pet won't be selected
+    await petsRepository.create({
+      org_id: org.id,
+      name: 'Pet 2',
+      description: 'Description 2',
+      age_in_months: 12,
+      size,
+      energy_level: 'HIGH',
+      adoption_requirements: ['Requirement 1'],
+    })
+
+    // Pet will be selected
+    await petsRepository.create({
+      org_id: org.id,
+      name: 'Pet 3',
+      description: 'Description 3',
+      age_in_months: 14,
+      size,
+      energy_level: energyLevel,
+      adoption_requirements: ['Requirement 1'],
+    })
+
+    const { pets } = await sut.execute({
+      city,
+      page: 1,
+      size,
+      energyLevel,
+    })
+
+    expect(pets).toHaveLength(1)
+    expect(pets).toEqual([
+      expect.objectContaining({
+        org_id: org.id,
+        name: 'Pet 3',
+        description: 'Description 3',
+      }),
+    ])
+  })
 })
