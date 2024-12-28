@@ -4,6 +4,7 @@ import { PetsRepository } from '@/repositories/pets-repository'
 interface GetPetsFromCityUseCaseRequest {
   city: string
   page: number
+  sortBy?: 'mostRecent'
   ageInMonths?: number
   size?: Size
   energyLevel?: EnergyLevel
@@ -19,11 +20,12 @@ export class GetPetsFromCityUseCase {
   async execute({
     city,
     page,
+    sortBy,
     ageInMonths,
     size,
     energyLevel,
   }: GetPetsFromCityUseCaseRequest): Promise<GetPetsFromCityUseCaseResponse> {
-    const pets = await this.petsRepository.findManyByCity(city, page, {
+    const pets = await this.petsRepository.findManyByCity(city, page, sortBy, {
       ageInMonths,
       size,
       energyLevel,
