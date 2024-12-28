@@ -163,7 +163,6 @@ describe('Get pets from city use case', () => {
 
   it('should be able to get pets from existing city filtered by age in months', async () => {
     const city = 'São Carlos'
-    const ageInMonths = 12
 
     const org = await orgsRepository.create({
       name: 'Org 1',
@@ -179,7 +178,7 @@ describe('Get pets from city use case', () => {
       org_id: org.id,
       name: 'Pet 1',
       description: 'Description 1',
-      age_in_months: ageInMonths,
+      age_in_months: 6,
       size: 'MEDIUM',
       energy_level: 'HIGH',
       adoption_requirements: ['Requirement 1'],
@@ -189,7 +188,7 @@ describe('Get pets from city use case', () => {
       org_id: org.id,
       name: 'Pet 2',
       description: 'Description 2',
-      age_in_months: ageInMonths,
+      age_in_months: 12,
       size: 'MEDIUM',
       energy_level: 'HIGH',
       adoption_requirements: ['Requirement 1'],
@@ -199,7 +198,7 @@ describe('Get pets from city use case', () => {
       org_id: org.id,
       name: 'Pet 3',
       description: 'Description 3',
-      age_in_months: 14,
+      age_in_months: 18,
       size: 'MEDIUM',
       energy_level: 'HIGH',
       adoption_requirements: ['Requirement 1'],
@@ -208,20 +207,23 @@ describe('Get pets from city use case', () => {
     const { pets } = await sut.execute({
       city,
       page: 1,
-      ageInMonths,
+      ageInMonths: {
+        min: 12,
+        max: 18,
+      },
     })
 
     expect(pets).toHaveLength(2)
     expect(pets).toEqual([
       expect.objectContaining({
         org_id: org.id,
-        name: 'Pet 1',
-        description: 'Description 1',
+        name: 'Pet 2',
+        description: 'Description 2',
       }),
       expect.objectContaining({
         org_id: org.id,
-        name: 'Pet 2',
-        description: 'Description 2',
+        name: 'Pet 3',
+        description: 'Description 3',
       }),
     ])
   })

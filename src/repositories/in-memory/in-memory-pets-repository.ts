@@ -21,7 +21,14 @@ export class InMemoryPetsRepository implements PetsRepository {
     city: string,
     page: number,
     sortBy?: 'mostRecent',
-    filters?: { ageInMonths?: number; size?: Size; energyLevel?: EnergyLevel },
+    filters?: {
+      ageInMonths?: {
+        min: number
+        max: number
+      }
+      size?: Size
+      energyLevel?: EnergyLevel
+    },
   ) {
     if (!this.inMemoryOrgsRepository) {
       throw new Error('inMemoryOrgsRepository is required for this operation')
@@ -44,7 +51,8 @@ export class InMemoryPetsRepository implements PetsRepository {
         !pet.deleted_at && // Check if pet is deleted
         orgsFromDesiredCity.find((org) => org.id === pet.org_id) && // Check if pet city matches with received city
         (filters?.ageInMonths === undefined ||
-          filters?.ageInMonths === pet.age_in_months) && // Check age in months filter
+          (filters?.ageInMonths.min <= pet.age_in_months &&
+            filters?.ageInMonths.max >= pet.age_in_months)) && // Check age in months filter
         (filters?.energyLevel === undefined ||
           filters?.energyLevel === pet.energy_level) && // Check energy level filter
         (filters?.size === undefined || filters?.size === pet.size) // Check size filter

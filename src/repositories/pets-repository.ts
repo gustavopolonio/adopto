@@ -6,7 +6,14 @@ export interface PetsRepository {
     city: string,
     page: number,
     sortBy?: 'mostRecent',
-    filters?: { ageInMonths?: number; size?: Size; energyLevel?: EnergyLevel },
+    filters?: {
+      ageInMonths?: {
+        min: number
+        max: number
+      }
+      size?: Size
+      energyLevel?: EnergyLevel
+    },
   ): Promise<Pet[]>
   create(data: Prisma.PetUncheckedCreateInput): Promise<Pet>
   save(pet: Pet): Promise<Pet>

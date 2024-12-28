@@ -5,7 +5,10 @@ interface GetPetsFromCityUseCaseRequest {
   city: string
   page: number
   sortBy?: 'mostRecent'
-  ageInMonths?: number
+  ageInMonths?: {
+    min: number
+    max: number
+  }
   size?: Size
   energyLevel?: EnergyLevel
 }
@@ -21,7 +24,7 @@ export class GetPetsFromCityUseCase {
     city,
     page,
     sortBy,
-    ageInMonths,
+    ageInMonths = { min: 0, max: 36 },
     size,
     energyLevel,
   }: GetPetsFromCityUseCaseRequest): Promise<GetPetsFromCityUseCaseResponse> {
