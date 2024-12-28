@@ -1,4 +1,4 @@
-import { Prisma, Pet } from '@prisma/client'
+import { Prisma, Pet, Size, EnergyLevel } from '@prisma/client'
 import { PetsRepository } from '../pets-repository'
 import { randomUUID } from 'node:crypto'
 import { InMemoryOrgsRepository } from './in-memory-orgs-repository'
@@ -16,7 +16,11 @@ export class InMemoryPetsRepository implements PetsRepository {
     return pet
   }
 
-  async findManyByCity(city: string, page: number) {
+  async findManyByCity(
+    city: string,
+    page: number,
+    filters?: { ageInMonths?: number; size?: Size; energyLevel?: EnergyLevel },
+  ) {
     if (!this.inMemoryOrgsRepository) {
       throw new Error('inMemoryOrgsRepository is required for this operation')
     }
@@ -35,8 +39,13 @@ export class InMemoryPetsRepository implements PetsRepository {
 
     const pets = this.pets.filter((pet) => {
       return (
-        orgsFromDesiredCity.find((org) => org.id === pet.org_id) &&
-        !pet.deleted_at
+        !pet.deleted_at && // Check if pet is deleted
+        orgsFromDesiredCity.find((org) => org.id === pet.org_id) && // Check if pet city matches with received city
+        (filters?.ageInMonths === undefined ||
+          filters?.ageInMonths === pet.age_in_months) && // Check age in months filter
+        (filters?.energyLevel === undefined ||
+          filters?.energyLevel === pet.energy_level) && // Check energy level filter
+        (filters?.size === undefined || filters?.size === pet.size) // Check size filter
       )
     })
 
