@@ -3,6 +3,7 @@ import { hash } from 'bcryptjs'
 import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-repository'
 import { GetPetProfileUseCase } from './get-pet-profile'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
+import { ResourceNotFoundError } from './errors/resource-not-found-error'
 
 let orgsRepository: InMemoryOrgsRepository
 let petsRepository: InMemoryPetsRepository
@@ -48,5 +49,13 @@ describe('Get pet profile use case', () => {
         description: 'Description 1',
       }),
     )
+  })
+
+  it('should not be able to get an unexisting pet profile', async () => {
+    await expect(
+      sut.execute({
+        id: 'non-existing-id',
+      }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 })
