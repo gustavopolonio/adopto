@@ -55,4 +55,12 @@ export class InMemoryPetsRepository implements PetsRepository {
       this.pets[petIndex].deleted_at = new Date()
     }
   }
+
+  async deleteManyByOrgId(orgId: string) {
+    this.pets.forEach((pet, index) => {
+      if (pet.org_id === orgId) {
+        this.pets[index].deleted_at = new Date()
+      }
+    })
+  }
 }
