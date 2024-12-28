@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { hash } from 'bcryptjs'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
+import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { DeleteOrgUseCase } from './delete-org'
 import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-repository'
 import { randomUUID } from 'node:crypto'
@@ -66,5 +67,13 @@ describe('Delete org use case', () => {
     expect(petsRepository.pets[0].deleted_at).not.toBeNull()
     expect(petsRepository.pets[1].deleted_at).not.toBeNull()
     expect(petsRepository.pets[2].deleted_at).toBeNull()
+  })
+
+  it('should not be able to delete an unexisting org', async () => {
+    await expect(
+      sut.execute({
+        id: 'non-existing-id',
+      }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 })
