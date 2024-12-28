@@ -144,4 +144,14 @@ describe('Get pets from city use case', () => {
       }),
     ])
   })
+
+  it('should not be able to get pets from unexisting city', async () => {
+    const { pets } = await sut.execute({
+      city: 'New York',
+      page: 1,
+    })
+
+    expect(pets).toHaveLength(0)
+    expect(pets).toEqual([])
+  })
 })
