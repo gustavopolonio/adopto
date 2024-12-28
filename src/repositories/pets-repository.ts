@@ -5,6 +5,7 @@ export interface PetsRepository {
   findManyByCity(
     city: string,
     page: number,
+    sortBy?: 'mostRecent',
     filters?: { ageInMonths?: number; size?: Size; energyLevel?: EnergyLevel },
   ): Promise<Pet[]>
   create(data: Prisma.PetUncheckedCreateInput): Promise<Pet>
