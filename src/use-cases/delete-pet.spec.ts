@@ -41,7 +41,7 @@ describe('Delete pet use case', () => {
       id: pet.id,
     })
 
-    expect(petsRepository.pets[0].updated_at).not.toBeNull()
+    expect(petsRepository.pets[0].deleted_at).not.toBeNull()
   })
 
   it('should not be able to delete an unexisting pet', async () => {
