@@ -1,15 +1,48 @@
 import { Prisma, Pet } from '@prisma/client'
 import { PetsRepository } from '../pets-repository'
 import { randomUUID } from 'node:crypto'
+import { InMemoryOrgsRepository } from './in-memory-orgs-repository'
+import { paginate } from '@/utils/paginate'
 
 export class InMemoryPetsRepository implements PetsRepository {
   public pets: Pet[] = []
+
+  constructor(private inMemoryOrgsRepository?: InMemoryOrgsRepository) {}
 
   async findById(id: string) {
     const pet = this.pets.find((pet) => pet.id === id)
 
     if (!pet) return null
     return pet
+  }
+
+  async findManyByCity(city: string, page: number) {
+    if (!this.inMemoryOrgsRepository) {
+      throw new Error('inMemoryOrgsRepository is required for this operation')
+    }
+
+    const orgsFromDesiredCity = this.inMemoryOrgsRepository.orgs.filter(
+      (org) =>
+        org.city
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase() ===
+        city
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase(),
+    )
+
+    const pets = this.pets.filter((pet) => {
+      return (
+        orgsFromDesiredCity.find((org) => org.id === pet.org_id) &&
+        !pet.deleted_at
+      )
+    })
+
+    const petsPaginated = paginate(pets, page)
+
+    return petsPaginated
   }
 
   async create(
