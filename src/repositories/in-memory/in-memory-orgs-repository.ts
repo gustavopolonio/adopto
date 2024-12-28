@@ -8,14 +8,14 @@ export class InMemoryOrgsRepository implements OrgsRepository {
   async findById(id: string) {
     const org = this.orgs.find((org) => org.id === id)
 
-    if (!org) return null
+    if (!org || org.deleted_at) return null
     return org
   }
 
   async findByEmail(email: string) {
     const org = this.orgs.find((org) => org.email === email)
 
-    if (!org) return null
+    if (!org || org.deleted_at) return null
     return org
   }
 
