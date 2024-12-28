@@ -15,7 +15,7 @@ describe('Get pets from city use case', () => {
     sut = new GetPetsFromCityUseCase(petsRepository)
   })
 
-  it.only('should be able to get pets from existing city', async () => {
+  it('should be able to get pets from existing city', async () => {
     const city = 'São Carlos'
 
     const firstOrg = await orgsRepository.create({
@@ -96,6 +96,51 @@ describe('Get pets from city use case', () => {
         org_id: firstOrg.id,
         name: 'Pet 2',
         description: 'Description 2',
+      }),
+    ])
+  })
+
+  it('should be able to get paginated pets from existing city', async () => {
+    const city = 'São Carlos'
+
+    const firstOrg = await orgsRepository.create({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password_hash: await hash('123456', 6),
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city,
+      whatsapp: '16 99399-0990',
+    })
+
+    for (let i = 1; i <= 22; i++) {
+      await petsRepository.create({
+        org_id: firstOrg.id,
+        name: `Pet ${i}`,
+        description: `Description ${i}`,
+        age_in_months: 12,
+        size: 'MEDIUM',
+        energy_level: 'HIGH',
+        adoption_requirements: ['Requirement 1'],
+      })
+    }
+
+    const { pets } = await sut.execute({
+      city,
+      page: 2,
+    })
+
+    expect(pets).toHaveLength(2)
+    expect(pets).toEqual([
+      expect.objectContaining({
+        org_id: firstOrg.id,
+        name: 'Pet 21',
+        description: 'Description 21',
+      }),
+      expect.objectContaining({
+        org_id: firstOrg.id,
+        name: 'Pet 22',
+        description: 'Description 22',
       }),
     ])
   })
