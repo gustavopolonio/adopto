@@ -3,6 +3,7 @@ import { hash } from 'bcryptjs'
 import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-repository'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { DeletePetUseCase } from './delete-pet'
+import { ResourceNotFoundError } from './errors/resource-not-found-error'
 
 let orgsRepository: InMemoryOrgsRepository
 let petsRepository: InMemoryPetsRepository
@@ -41,5 +42,13 @@ describe('Delete pet use case', () => {
     })
 
     expect(petsRepository.pets[0].updated_at).not.toBeNull()
+  })
+
+  it('should not be able to delete an unexisting pet', async () => {
+    await expect(
+      sut.execute({
+        id: 'non-existing-id',
+      }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 })
