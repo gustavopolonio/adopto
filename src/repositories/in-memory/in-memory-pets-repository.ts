@@ -30,6 +30,7 @@ export class InMemoryPetsRepository implements PetsRepository {
       org_id: data.org_id,
       created_at: new Date(),
       updated_at: new Date(),
+      deleted_at: null,
     }
 
     this.pets.push(pet)
@@ -45,5 +46,13 @@ export class InMemoryPetsRepository implements PetsRepository {
     }
 
     return pet
+  }
+
+  async delete(id: string) {
+    const petIndex = this.pets.findIndex((petItem) => petItem.id === id)
+
+    if (petIndex >= 0) {
+      this.pets[petIndex].deleted_at = new Date()
+    }
   }
 }
