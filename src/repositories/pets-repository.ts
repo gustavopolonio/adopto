@@ -5,4 +5,5 @@ export interface PetsRepository {
   create(data: Prisma.PetUncheckedCreateInput): Promise<Pet>
   save(pet: Pet): Promise<Pet>
   delete(id: string): Promise<void>
+  deleteManyByOrgId(orgId: string): Promise<void>
 }
