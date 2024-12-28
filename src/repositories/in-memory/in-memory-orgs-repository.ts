@@ -37,6 +37,7 @@ export class InMemoryOrgsRepository implements OrgsRepository {
         : null,
       created_at: new Date(),
       updated_at: new Date(),
+      deleted_at: null,
     }
 
     this.orgs.push(org)
@@ -52,5 +53,13 @@ export class InMemoryOrgsRepository implements OrgsRepository {
     }
 
     return org
+  }
+
+  async delete(id: string) {
+    const orgIndex = this.orgs.findIndex((orgItem) => orgItem.id === id)
+
+    if (orgIndex >= 0) {
+      this.orgs[orgIndex].deleted_at = new Date()
+    }
   }
 }
