@@ -1,4 +1,5 @@
 import { Prisma, Pet, Size, EnergyLevel } from '@prisma/client'
+import dayjs from 'dayjs'
 import { PetsRepository } from '../pets-repository'
 import { randomUUID } from 'node:crypto'
 import { InMemoryOrgsRepository } from './in-memory-orgs-repository'
@@ -19,6 +20,7 @@ export class InMemoryPetsRepository implements PetsRepository {
   async findManyByCity(
     city: string,
     page: number,
+    sortBy?: 'mostRecent',
     filters?: { ageInMonths?: number; size?: Size; energyLevel?: EnergyLevel },
   ) {
     if (!this.inMemoryOrgsRepository) {
@@ -48,6 +50,12 @@ export class InMemoryPetsRepository implements PetsRepository {
         (filters?.size === undefined || filters?.size === pet.size) // Check size filter
       )
     })
+
+    if (sortBy === 'mostRecent') {
+      pets.sort(
+        (a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf(),
+      )
+    }
 
     const petsPaginated = paginate(pets, page)
 
