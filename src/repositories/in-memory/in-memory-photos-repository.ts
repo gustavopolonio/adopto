@@ -32,6 +32,6 @@ export class InMemoryPhotosRepository implements PhotosRepository {
 
     this.photos.push(...photos)
 
-    return photos
+    return { count: photos.length }
   }
 }
