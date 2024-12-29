@@ -8,6 +8,7 @@ const envSchema = z.object({
   GOOGLE_MAPS_API_KEY: z.string(),
   AWS_ACCESS_KEY: z.string(),
   AWS_SECRET_ACCESS_KEY: z.string(),
+  JWT_SECRET: z.string(),
 })
 
 const _env = envSchema.safeParse(process.env)
