@@ -4,7 +4,7 @@ import { ZodError } from 'zod'
 import { env } from './env'
 import { orgsRoutes } from './http/controllers/orgs/routes'
 
-const app = fastify()
+export const app = fastify()
 
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
@@ -26,11 +26,3 @@ app.setErrorHandler((error, _, reply) => {
 
   return reply.status(500).send({ message: 'Internal server error' })
 })
-
-app
-  .listen({
-    port: env.PORT,
-  })
-  .then(() => {
-    console.log(`Server running on port: ${env.PORT}`)
-  })
