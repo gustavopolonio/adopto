@@ -3,16 +3,9 @@ import { hash } from 'bcryptjs'
 import { OrgsRepository } from '@/repositories/orgs-repository'
 import { geocodeAddress } from '@/utils/geocode-address'
 import { UserAlreadyExistsError } from './errors/user-already-exists-error'
+import { RegisterOrgInput } from '@/@types/orgs'
 
-interface RegisterOrgUseCaseRequest {
-  name: string
-  email: string
-  password: string
-  zipCode: string
-  address: string
-  city: string
-  whatsapp: string
-}
+interface RegisterOrgUseCaseRequest extends RegisterOrgInput {}
 
 interface RegisterOrgUseCaseResponse {
   org: Org
