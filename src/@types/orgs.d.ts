@@ -7,3 +7,8 @@ export interface RegisterOrgInput {
   city: string
   whatsapp: string
 }
+
+export interface AuthenticateOrgInput {
+  email: string
+  password: string
+}
