@@ -13,7 +13,7 @@ export class InMemoryPhotosRepository implements PhotosRepository {
     const photo = {
       id: randomUUID(),
       hash: data.hash,
-      s3_url: data.s3_url,
+      url: data.url,
       pet_id: data.pet_id,
     }
 
@@ -26,7 +26,7 @@ export class InMemoryPhotosRepository implements PhotosRepository {
     const photos = data.map((photo) => ({
       id: randomUUID(),
       hash: photo.hash,
-      s3_url: photo.s3_url,
+      url: photo.url,
       pet_id: photo.pet_id,
     }))
 
