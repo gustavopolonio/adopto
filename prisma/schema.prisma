@@ -28,9 +28,9 @@ model Org {
 }
 
 model Photo {
-  id     String @id @default(uuid())
-  hash   String
-  s3_url String
+  id   String @id @default(uuid())
+  hash String
+  url  String
 
   pet    Pet    @relation(fields: [pet_id], references: [id])
   pet_id String
