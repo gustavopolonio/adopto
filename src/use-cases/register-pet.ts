@@ -1,26 +1,15 @@
-import { EnergyLevel, Pet, Prisma, Size } from '@prisma/client'
-import { MultipartFile } from '@fastify/multipart'
+import { PassThrough } from 'node:stream'
+import { Pet, Prisma } from '@prisma/client'
 import { OrgsRepository } from '@/repositories/orgs-repository'
 import { PetsRepository } from '@/repositories/pets-repository'
 import { PhotosRepository } from '@/repositories/photos-repository'
+import { FileStorageProvider } from '@/providers/file-storage/file-storage-provider'
 import { generateFileHash } from '@/utils/generate-file-hash'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
-import { uploadFileToS3 } from '@/utils/upload-file-to-s3'
+import { UploadPhotoError } from './errors/upload-photo-error'
+import { RegisterPetInput } from '@/@types/pets'
 
-export interface PetPhoto {
-  file: MultipartFile
-}
-
-interface RegisterPetUseCaseRequest {
-  name: string
-  description: string
-  ageInMonths: number
-  size: Size
-  energyLevel: EnergyLevel
-  photos: PetPhoto[]
-  adoptionRequirements: string[]
-  orgId: string
-}
+interface RegisterPetUseCaseRequest extends RegisterPetInput {}
 
 interface RegisterPetUseCaseResponse {
   pet: Pet
@@ -31,6 +20,7 @@ export class RegisterPetUseCase {
     private petsRepository: PetsRepository,
     private orgsRepository: OrgsRepository,
     private photosRepository: PhotosRepository,
+    private fileStorageProvider: FileStorageProvider,
   ) {}
 
   async execute({
@@ -61,27 +51,37 @@ export class RegisterPetUseCase {
 
     const photosToUpload: Prisma.PhotoUncheckedCreateInput[] = []
 
-    async function uploadFiles() {
-      try {
-        await Promise.all(
-          photos.map(async (photo) => {
-            const uploadedFile = await uploadFileToS3(photo.file)
-            const hash = generateFileHash(photo.file.filename)
+    try {
+      await Promise.all(
+        photos.map(async (photo) => {
+          const { file, filename, mimetype } = photo
 
-            photosToUpload.push({
-              s3_url: uploadedFile.Location!,
-              hash,
-              pet_id: pet.id,
-            })
-          }),
-        )
-      } catch (error) {
-        console.error('Error uploadind files', error)
-        throw error
-      }
+          const fileCloneToStore = new PassThrough()
+          const fileCloneToHash = new PassThrough()
+          file.pipe(fileCloneToStore).pipe(fileCloneToHash)
+
+          const { fileUrl } = await this.fileStorageProvider.upload(
+            fileCloneToStore,
+            filename,
+            mimetype,
+          )
+
+          if (!fileUrl) {
+            throw new UploadPhotoError()
+          }
+
+          const hash = await generateFileHash(fileCloneToHash)
+
+          photosToUpload.push({
+            url: fileUrl,
+            hash,
+            pet_id: pet.id,
+          })
+        }),
+      )
+    } catch (error) {
+      throw new UploadPhotoError()
     }
-
-    await uploadFiles()
     await this.photosRepository.createMany(photosToUpload)
 
     return { pet }

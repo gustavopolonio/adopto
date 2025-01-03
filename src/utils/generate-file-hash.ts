@@ -1,9 +1,14 @@
-import * as fs from 'fs'
-import { createHash } from 'crypto'
+import { createHash } from 'node:crypto'
+import { Readable } from 'node:stream'
 
-export function generateFileHash(filePath: string): string {
-  const fileBuffer = fs.readFileSync(filePath)
-  const hash = createHash('sha256')
-  hash.update(fileBuffer)
-  return hash.digest('hex')
+export async function generateFileHash(file: Readable): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hash = createHash('sha256')
+
+    file.on('error', reject)
+    file.pipe(hash)
+
+    hash.on('finish', () => resolve(hash.digest('hex')))
+    hash.on('error', reject)
+  })
 }

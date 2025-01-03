@@ -1,0 +1,26 @@
+import { Readable } from 'node:stream'
+
+export type EnergyLevel = 'MEDIUM' | 'LOW' | 'HIGH'
+
+export type Size = 'MEDIUM' | 'SMALL' | 'LARGE'
+
+interface PetPhoto {
+  file: Readable
+  filename: string
+  mimetype: string
+}
+
+export interface RegisterPetInput {
+  name: string
+  description: string
+  ageInMonths: number
+  size: Size
+  energyLevel: EnergyLevel
+  photos: PetPhoto[]
+  adoptionRequirements: string[]
+  orgId: string
+}
+
+export type RegisterPetInputKeys = keyof RegisterPetInput
+
+export type RegisterPetInputValues = RegisterPetInput[keyof RegisterPetInput]
