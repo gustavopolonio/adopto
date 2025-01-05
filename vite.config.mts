@@ -7,5 +7,8 @@ export default defineConfig({
     environmentMatchGlobs: [
       ['src/http/**', 'prisma/vitest-environment-prisma.ts'],
     ],
+    env: {
+      BUCKET_NAME: 'adopto-pet-images-test',
+    },
   },
 })
