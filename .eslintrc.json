@@ -1,6 +1,10 @@
 {
   "extends": "@rocketseat/eslint-config/node",
   "rules": {
-    "no-useless-constructor": "off"
+    "no-useless-constructor": "off",
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "varsIgnorePattern": "^_", // Ignore unused variables starting with _
+      "argsIgnorePattern": "^_" // Ignore unused function arguments starting with _
+    }]
   }
 }
