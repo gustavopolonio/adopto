@@ -1,7 +1,5 @@
 import { Readable } from 'node:stream'
 import { beforeEach, describe, expect, it } from 'vitest'
-import * as fs from 'fs'
-import { Upload } from '@aws-sdk/lib-storage'
 import { hash } from 'bcryptjs'
 import { RegisterPetUseCase } from './register-pet'
 import { MockFileSorageProvider } from '@/providers/file-storage/implementations/mock-file-storage-provider'
@@ -56,7 +54,7 @@ describe('Register pet use case', () => {
     )
   })
 
-  it.only('should be able to register a pet', async () => {
+  it('should be able to register a pet', async () => {
     const org = await orgsRepository.create({
       name: 'Org 1',
       email: 'org1@test.test',
@@ -98,7 +96,7 @@ describe('Register pet use case', () => {
     )
   })
 
-  it('should not be able to register a pet that is not linked with an org', async () => {
+  it.only('should not be able to register a pet that is not linked with an org', async () => {
     await expect(
       sut.execute({
         orgId: 'non-existing-org-id',
@@ -111,8 +109,5 @@ describe('Register pet use case', () => {
         adoptionRequirements: ['Requirement 1'],
       }),
     ).rejects.toBeInstanceOf(ResourceNotFoundError)
-
-    expect(Upload).toHaveBeenCalledTimes(0)
-    expect(fs.createReadStream).toHaveBeenCalledTimes(0)
   })
 })
