@@ -39,16 +39,6 @@ export class RegisterPetUseCase {
       throw new ResourceNotFoundError()
     }
 
-    const pet = await this.petsRepository.create({
-      name,
-      description,
-      age_in_months: ageInMonths,
-      size,
-      energy_level: energyLevel,
-      adoption_requirements: adoptionRequirements,
-      org_id: orgId,
-    })
-
     const photosToUpload: Prisma.PhotoUncheckedCreateInput[] = []
 
     try {
@@ -75,13 +65,26 @@ export class RegisterPetUseCase {
           photosToUpload.push({
             url: fileUrl,
             hash,
-            pet_id: pet.id,
+            pet_id: '',
           })
         }),
       )
     } catch (error) {
       throw new UploadPhotoError()
     }
+
+    const pet = await this.petsRepository.create({
+      name,
+      description,
+      age_in_months: ageInMonths,
+      size,
+      energy_level: energyLevel,
+      adoption_requirements: adoptionRequirements,
+      org_id: orgId,
+    })
+
+    photosToUpload.forEach((photo) => (photo.pet_id = pet.id))
+
     await this.photosRepository.createMany(photosToUpload)
 
     return { pet }
