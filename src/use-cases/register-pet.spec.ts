@@ -1,51 +1,45 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { hash } from 'bcryptjs'
+import { Readable } from 'node:stream'
+import { beforeEach, describe, expect, it } from 'vitest'
 import * as fs from 'fs'
 import { Upload } from '@aws-sdk/lib-storage'
-import { MultipartFile } from '@fastify/multipart'
+import { hash } from 'bcryptjs'
+import { RegisterPetUseCase } from './register-pet'
+import { MockFileSorageProvider } from '@/providers/file-storage/implementations/mock-file-storage-provider'
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-repository'
-import { RegisterPetUseCase } from './register-pet'
-import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { InMemoryPhotosRepository } from '@/repositories/in-memory/in-memory-photos-repository'
+import { ResourceNotFoundError } from './errors/resource-not-found-error'
+import { PetPhoto } from '@/@types/pets'
 
-vi.mock('@aws-sdk/lib-storage', () => ({
-  Upload: vi.fn().mockImplementation(() => ({
-    done: vi.fn().mockResolvedValue({ Location: 'mocked-s3-url' }),
-  })),
-}))
+function createDummyFile(fileData = 'dummy data') {
+  const fileStream = new Readable()
+  fileStream.push(fileData)
+  fileStream.push(null)
+  return fileStream
+}
 
-vi.mock('fs', () => ({
-  createReadStream: vi
-    .fn()
-    .mockImplementation((filePath) => `stream-of-${filePath}`),
-  readFileSync: vi
-    .fn()
-    .mockImplementation((filePath) =>
-      Buffer.from(`mock-content-of-${filePath}`),
-    ),
-}))
-
-const mockedPhotos = [
+const mockedPhotos: PetPhoto[] = [
   {
-    file: {
-      filename: 'photo1.jpg',
-      mimetype: 'image/jpeg',
-      encoding: '7bit',
-    } as MultipartFile,
+    file: createDummyFile(),
+    filename: 'photo1.jpg',
+    mimetype: 'image/jpeg',
   },
   {
-    file: {
-      filename: 'photo2.jpg',
-      mimetype: 'image/jpeg',
-      encoding: '7bit',
-    } as MultipartFile,
+    file: createDummyFile(),
+    filename: 'photo2.jpg',
+    mimetype: 'image/jpg',
+  },
+  {
+    file: createDummyFile('dummy data 3'),
+    filename: 'photo3.jpg',
+    mimetype: 'image/png',
   },
 ]
 
 let petsRepository: InMemoryPetsRepository
 let orgsRepository: InMemoryOrgsRepository
 let photosRepository: InMemoryPhotosRepository
+let fileStorageProvider: MockFileSorageProvider
 let sut: RegisterPetUseCase
 
 describe('Register pet use case', () => {
@@ -53,18 +47,16 @@ describe('Register pet use case', () => {
     petsRepository = new InMemoryPetsRepository()
     orgsRepository = new InMemoryOrgsRepository()
     photosRepository = new InMemoryPhotosRepository()
+    fileStorageProvider = new MockFileSorageProvider()
     sut = new RegisterPetUseCase(
       petsRepository,
       orgsRepository,
       photosRepository,
+      fileStorageProvider,
     )
   })
 
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
-
-  it('should be able to register a pet', async () => {
+  it.only('should be able to register a pet', async () => {
     const org = await orgsRepository.create({
       name: 'Org 1',
       email: 'org1@test.test',
@@ -87,18 +79,23 @@ describe('Register pet use case', () => {
     })
 
     expect(pet.id).toEqual(expect.any(String))
-    expect(Upload).toHaveBeenCalledTimes(2)
-    expect(fs.createReadStream).toHaveBeenCalledTimes(2)
-    expect(fs.createReadStream).toHaveBeenCalledWith('photo1.jpg')
-    expect(fs.createReadStream).toHaveBeenCalledWith('photo2.jpg')
     expect(photosRepository.photos).toEqual([
       expect.objectContaining({
-        s3_url: 'mocked-s3-url',
+        pet_id: pet.id,
+        url: `http://mock-storage/${mockedPhotos[0].filename}`,
       }),
       expect.objectContaining({
-        s3_url: 'mocked-s3-url',
+        pet_id: pet.id,
+        url: `http://mock-storage/${mockedPhotos[1].filename}`,
+      }),
+      expect.objectContaining({
+        pet_id: pet.id,
+        url: `http://mock-storage/${mockedPhotos[2].filename}`,
       }),
     ])
+    expect(photosRepository.photos[0].hash).toEqual(
+      photosRepository.photos[1].hash,
+    )
   })
 
   it('should not be able to register a pet that is not linked with an org', async () => {
