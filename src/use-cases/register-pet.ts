@@ -1,4 +1,5 @@
 import { PassThrough } from 'node:stream'
+import { randomUUID } from 'node:crypto'
 import { Pet, Prisma } from '@prisma/client'
 import { OrgsRepository } from '@/repositories/orgs-repository'
 import { PetsRepository } from '@/repositories/pets-repository'
@@ -40,6 +41,7 @@ export class RegisterPetUseCase {
     }
 
     const photosToUpload: Prisma.PhotoUncheckedCreateInput[] = []
+    const petId = randomUUID()
 
     try {
       await Promise.all(
@@ -51,6 +53,7 @@ export class RegisterPetUseCase {
           file.pipe(fileCloneToStore).pipe(fileCloneToHash)
 
           const { fileUrl } = await this.fileStorageProvider.upload(
+            petId,
             fileCloneToStore,
             filename,
             mimetype,
@@ -65,7 +68,7 @@ export class RegisterPetUseCase {
           photosToUpload.push({
             url: fileUrl,
             hash,
-            pet_id: '',
+            pet_id: petId,
           })
         }),
       )
@@ -74,6 +77,7 @@ export class RegisterPetUseCase {
     }
 
     const pet = await this.petsRepository.create({
+      id: petId,
       name,
       description,
       age_in_months: ageInMonths,

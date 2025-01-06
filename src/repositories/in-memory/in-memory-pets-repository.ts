@@ -77,7 +77,7 @@ export class InMemoryPetsRepository implements PetsRepository {
     },
   ): Promise<Pet> {
     const pet = {
-      id: randomUUID(),
+      id: data.id ?? randomUUID(),
       name: data.name,
       description: data.description ?? null,
       age_in_months: data.age_in_months,
