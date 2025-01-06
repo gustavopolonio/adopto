@@ -34,4 +34,12 @@ export class InMemoryPhotosRepository implements PhotosRepository {
 
     return { count: photos.length }
   }
+
+  async delete(id: string) {
+    const photoIndex = this.photos.findIndex((photo) => photo.id === id)
+
+    if (photoIndex >= 0) {
+      this.photos.splice(photoIndex, 1)
+    }
+  }
 }
