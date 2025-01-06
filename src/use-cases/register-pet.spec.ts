@@ -113,7 +113,7 @@ describe('Register pet use case', () => {
   })
 
   it('should not be able to register a pet if file upload fails', async () => {
-    fileStorageProvider.shouldFail = true
+    fileStorageProvider.shouldUploadFail = true
 
     const org = await orgsRepository.create({
       name: 'Org 1',
