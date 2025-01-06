@@ -6,4 +6,5 @@ export interface PhotosRepository {
   createMany(
     data: Prisma.PhotoUncheckedCreateInput[],
   ): Promise<{ count: number }>
+  delete(id: string): Promise<void>
 }
