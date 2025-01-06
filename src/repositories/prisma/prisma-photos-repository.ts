@@ -28,4 +28,12 @@ export class PrismaPhotosRepository implements PhotosRepository {
 
     return photos
   }
+
+  async delete(id: string) {
+    await prisma.photo.delete({
+      where: {
+        id,
+      },
+    })
+  }
 }
