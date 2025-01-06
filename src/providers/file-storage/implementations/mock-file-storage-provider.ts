@@ -1,10 +1,15 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
 import { FileStorageProvider } from '../file-storage-provider'
 
 export class MockFileSorageProvider implements FileStorageProvider {
   public shouldFail = false
 
-  async upload(_file: Readable, filename: string, _mimetype: string) {
+  async upload(
+    _petId: string,
+    _file: Readable,
+    filename: string,
+    _mimetype: string,
+  ) {
     let fileUrl = null
 
     if (!this.shouldFail) {
