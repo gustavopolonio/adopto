@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { hash } from 'bcryptjs'
 import { RegisterPetUseCase } from './register-pet'
@@ -6,16 +5,10 @@ import { MockFileSorageProvider } from '@/providers/file-storage/implementations
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-repository'
 import { InMemoryPhotosRepository } from '@/repositories/in-memory/in-memory-photos-repository'
+import { createDummyFile } from './tests/utils/create-dummy-file'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { UploadPhotoError } from './errors/upload-photo-error'
 import { PetPhoto } from '@/@types/pets'
-
-function createDummyFile(fileData = 'dummy data') {
-  const fileStream = new Readable()
-  fileStream.push(fileData)
-  fileStream.push(null)
-  return fileStream
-}
 
 const mockedPhotos: PetPhoto[] = [
   {
