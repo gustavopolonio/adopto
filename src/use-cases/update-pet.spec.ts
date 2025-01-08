@@ -7,6 +7,7 @@ import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-
 import { InMemoryPhotosRepository } from '@/repositories/in-memory/in-memory-photos-repository'
 import { generateFileHash } from '@/utils/generate-file-hash'
 import { createDummyFile } from './tests/utils/create-dummy-file'
+import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { PetPhoto } from '@/@types/pets'
 
 let petsRepository: InMemoryPetsRepository
@@ -91,7 +92,7 @@ describe('Update pet use case', () => {
     expect(photosRepository.photos).toHaveLength(0)
   })
 
-  it.only('should be able to update a pet with files change', async () => {
+  it('should be able to update a pet with files change', async () => {
     const org = await orgsRepository.create({
       name: 'Org 1',
       email: 'org1@test.test',
@@ -165,7 +166,21 @@ describe('Update pet use case', () => {
     ])
   })
 
-  // it('should not be able to update an unexisting pet', async () => {})
+  it('should not be able to update an unexisting pet', async () => {
+    await expect(
+      sut.execute({
+        id: 'non-existing-pet-id',
+        name: 'New pet 1',
+        description: 'Description 1',
+        ageInMonths: 10,
+        size: 'MEDIUM',
+        energyLevel: 'LOW',
+        adoptionRequirements: ['Requirement 2'],
+        orgId: 'non-existing-org-id',
+        photos: [],
+      }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+  })
 
   // it('should not be able to update a pet of an unexisting org', async () => {})
 
