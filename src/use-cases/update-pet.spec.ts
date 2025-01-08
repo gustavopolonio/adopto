@@ -182,7 +182,31 @@ describe('Update pet use case', () => {
     ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 
-  // it('should not be able to update a pet of an unexisting org', async () => {})
+  it('should not be able to update a pet of an unexisting org', async () => {
+    const pet = await petsRepository.create({
+      org_id: 'org-1',
+      name: 'Pet 1',
+      description: 'Description 1',
+      age_in_months: 12,
+      size: 'MEDIUM',
+      energy_level: 'HIGH',
+      adoption_requirements: ['Requirement 1'],
+    })
+
+    await expect(
+      sut.execute({
+        id: pet.id,
+        name: 'New pet 1',
+        description: 'Description 1',
+        ageInMonths: 10,
+        size: 'MEDIUM',
+        energyLevel: 'LOW',
+        adoptionRequirements: ['Requirement 2'],
+        orgId: 'non-existing-org-id',
+        photos: [],
+      }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+  })
 
   // it('should not be able to update a pet if file upload fails', async () => {})
 
