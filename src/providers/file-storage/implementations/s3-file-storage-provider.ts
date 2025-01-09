@@ -1,9 +1,9 @@
 import { Readable } from 'node:stream'
 import { DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { Upload } from '@aws-sdk/lib-storage'
 import { s3Client } from '@/lib/aws-s3'
 import { env } from '@/env'
 import { FileStorageProvider } from '../file-storage-provider'
-import { uploadFileToS3 } from '@/utils/upload-file-to-s3'
 
 export class S3FileStorageProvider implements FileStorageProvider {
   async upload(
@@ -12,7 +12,17 @@ export class S3FileStorageProvider implements FileStorageProvider {
     filename: string,
     mimetype: string,
   ) {
-    const uploadedFile = await uploadFileToS3(petId, file, filename, mimetype)
+    const upload = new Upload({
+      client: s3Client,
+      params: {
+        Bucket: env.BUCKET_NAME,
+        Key: `${petId}-${Date.now()}-${filename}`,
+        Body: file,
+        ContentType: mimetype,
+      },
+    })
+
+    const uploadedFile = await upload.done()
 
     let fileUrl = null
 
