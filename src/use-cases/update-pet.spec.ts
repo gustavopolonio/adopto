@@ -10,6 +10,7 @@ import { createDummyFile } from './tests/utils/create-dummy-file'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { UploadPhotoError } from './errors/upload-photo-error'
 import { PetPhoto } from '@/@types/pets'
+import { RemovePhotoError } from './errors/remove-photo-error'
 
 let petsRepository: InMemoryPetsRepository
 let orgsRepository: InMemoryOrgsRepository
@@ -247,5 +248,47 @@ describe('Update pet use case', () => {
     ).rejects.toBeInstanceOf(UploadPhotoError)
   })
 
-  // it('should not be able to update a pet if file deletion fails', async () => {})
+  it('should not be able to update a pet if file deletion fails', async () => {
+    const org = await orgsRepository.create({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password_hash: await hash('123456', 6),
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    const petCreated = await petsRepository.create({
+      org_id: org.id,
+      name: 'Pet 1',
+      description: 'Description 1',
+      age_in_months: 12,
+      size: 'MEDIUM',
+      energy_level: 'HIGH',
+      adoption_requirements: ['Requirement 1'],
+    })
+
+    await photosRepository.create({
+      pet_id: petCreated.id,
+      hash: await generateFileHash(createDummyFile('Dummy file 2')),
+      url: 'http://mock-storage/photo2.jpg',
+    })
+
+    fileStorageProvider.shouldRemoveFail = true
+
+    await expect(
+      sut.execute({
+        id: petCreated.id,
+        name: 'New pet 1',
+        description: 'Description 1',
+        ageInMonths: 10,
+        size: 'MEDIUM',
+        energyLevel: 'LOW',
+        adoptionRequirements: ['Requirement 2'],
+        orgId: org.id,
+        photos: mockedPhotos,
+      }),
+    ).rejects.toBeInstanceOf(RemovePhotoError)
+  })
 })
