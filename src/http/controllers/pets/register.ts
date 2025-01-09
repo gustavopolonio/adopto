@@ -20,7 +20,7 @@ const fileSchema = z.object({
 })
 
 export async function register(request: FastifyRequest, reply: FastifyReply) {
-  const registerBodySchema = z.object({
+  const registerPetBodySchema = z.object({
     name: z.string(),
     description: z.string(),
     ageInMonths: z.coerce.number().min(1),
@@ -82,7 +82,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     energyLevel,
     photos: parsedPhotos,
     adoptionRequirements,
-  } = registerBodySchema.parse({
+  } = registerPetBodySchema.parse({
     ...formData,
     adoptionRequirements: JSON.parse(formData.adoptionRequirements as string),
   })
