@@ -1,4 +1,3 @@
-import { PassThrough } from 'node:stream'
 import { randomUUID } from 'node:crypto'
 import { Pet, Prisma } from '@prisma/client'
 import { OrgsRepository } from '@/repositories/orgs-repository'
@@ -48,13 +47,17 @@ export class RegisterPetUseCase {
         photos.map(async (photo) => {
           const { file, filename, mimetype } = photo
 
-          const fileCloneToStore = new PassThrough()
-          const fileCloneToHash = new PassThrough()
-          file.pipe(fileCloneToStore).pipe(fileCloneToHash)
+          const chunks: Buffer[] = []
+
+          for await (const chunk of file) {
+            chunks.push(chunk)
+          }
+
+          const buffer = Buffer.concat(chunks)
 
           const { fileUrl } = await this.fileStorageProvider.upload(
             petId,
-            fileCloneToStore,
+            buffer,
             filename,
             mimetype,
           )
@@ -63,7 +66,7 @@ export class RegisterPetUseCase {
             throw new UploadPhotoError()
           }
 
-          const hash = await generateFileHash(fileCloneToHash)
+          const hash = generateFileHash(buffer)
 
           photosToUpload.push({
             url: fileUrl,
