@@ -14,6 +14,7 @@ export class InMemoryPhotosRepository implements PhotosRepository {
       id: randomUUID(),
       hash: data.hash,
       url: data.url,
+      key: data.key ?? '',
       pet_id: data.pet_id,
     }
 
@@ -27,6 +28,7 @@ export class InMemoryPhotosRepository implements PhotosRepository {
       id: randomUUID(),
       hash: photo.hash,
       url: photo.url,
+      key: photo.key ?? '',
       pet_id: photo.pet_id,
     }))
 

@@ -7,10 +7,11 @@ import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-
 import { InMemoryPhotosRepository } from '@/repositories/in-memory/in-memory-photos-repository'
 import { generateFileHash } from '@/utils/generate-file-hash'
 import { createDummyFile } from './tests/utils/create-dummy-file'
+import { convertReadableToBuffer } from './tests/utils/convert-readable-to-buffer'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { UploadPhotoError } from './errors/upload-photo-error'
-import { PetPhoto } from '@/@types/pets'
 import { RemovePhotoError } from './errors/remove-photo-error'
+import { PetPhoto } from '@/@types/pets'
 
 let petsRepository: InMemoryPetsRepository
 let orgsRepository: InMemoryOrgsRepository
@@ -118,12 +119,16 @@ describe('Update pet use case', () => {
     await photosRepository.createMany([
       {
         pet_id: petCreated.id,
-        hash: await generateFileHash(createDummyFile('Dummy file 1')),
+        hash: generateFileHash(
+          await convertReadableToBuffer(createDummyFile('Dummy file 1')),
+        ),
         url: 'http://mock-storage/photo1.jpg',
       },
       {
         pet_id: petCreated.id,
-        hash: await generateFileHash(createDummyFile('Dummy file 2')),
+        hash: generateFileHash(
+          await convertReadableToBuffer(createDummyFile('Dummy file 2')),
+        ),
         url: 'http://mock-storage/photo2.jpg',
       },
     ])
@@ -157,12 +162,16 @@ describe('Update pet use case', () => {
     expect(photosRepository.photos).toEqual([
       expect.objectContaining({
         pet_id: pet.id,
-        hash: await generateFileHash(createDummyFile('Dummy file 1')),
+        hash: generateFileHash(
+          await convertReadableToBuffer(createDummyFile('Dummy file 1')),
+        ),
         url: 'http://mock-storage/photo1.jpg',
       }),
       expect.objectContaining({
         pet_id: pet.id,
-        hash: await generateFileHash(createDummyFile('Dummy file 3')),
+        hash: generateFileHash(
+          await convertReadableToBuffer(createDummyFile('Dummy file 3')),
+        ),
         url: 'http://mock-storage/photo3.jpg',
       }),
     ])
@@ -271,7 +280,9 @@ describe('Update pet use case', () => {
 
     await photosRepository.create({
       pet_id: petCreated.id,
-      hash: await generateFileHash(createDummyFile('Dummy file 2')),
+      hash: generateFileHash(
+        await convertReadableToBuffer(createDummyFile('Dummy file 2')),
+      ),
       url: 'http://mock-storage/photo2.jpg',
     })
 
