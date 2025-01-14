@@ -30,6 +30,7 @@ model Org {
 model Photo {
   id   String @id @default(uuid())
   hash String
+  key  String @default("")
   url  String
 
   pet    Pet    @relation(fields: [pet_id], references: [id])
