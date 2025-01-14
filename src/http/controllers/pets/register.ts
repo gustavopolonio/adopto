@@ -20,6 +20,8 @@ const fileSchema = z.object({
 })
 
 export async function register(request: FastifyRequest, reply: FastifyReply) {
+  const orgId = request.user.sub
+
   const registerPetBodySchema = z.object({
     name: z.string(),
     description: z.string(),
@@ -43,7 +45,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       const chunks: Buffer[] = []
 
       await new Promise<void>((resolve, reject) => {
-        part.file.on('data', (chunk) => {
+        part.file.on('data', (chunk: Buffer) => {
           fileSize += chunk.length
 
           if (fileSize > MAX_FILE_SIZE) {
@@ -88,7 +90,6 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
   })
 
   const registerPetUseCase = makeRegisterPetUseCase()
-  const orgId = request.user.sub
 
   try {
     await registerPetUseCase.execute({
