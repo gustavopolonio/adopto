@@ -1,26 +1,15 @@
-import { PassThrough } from 'node:stream'
-import { EnergyLevel, Pet, Prisma, Size } from '@prisma/client'
+import { Pet, Prisma } from '@prisma/client'
 import { OrgsRepository } from '@/repositories/orgs-repository'
 import { PetsRepository } from '@/repositories/pets-repository'
 import { generateFileHash } from '@/utils/generate-file-hash'
 import { PhotosRepository } from '@/repositories/photos-repository'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
-import { PetPhoto } from '@/@types/pets'
+import { UpdatePetInput } from '@/@types/pets'
 import { FileStorageProvider } from '@/providers/file-storage/file-storage-provider'
 import { UploadPhotoError } from './errors/upload-photo-error'
 import { RemovePhotoError } from './errors/remove-photo-error'
 
-interface UpdatePetUseCaseRequest {
-  id: string
-  name: string
-  description: string
-  ageInMonths: number
-  size: Size
-  energyLevel: EnergyLevel
-  photos: PetPhoto[]
-  adoptionRequirements: string[]
-  orgId: string
-}
+interface UpdatePetUseCaseRequest extends UpdatePetInput {}
 
 interface UpdatePetUseCaseResponse {
   pet: Pet
@@ -61,10 +50,15 @@ export class UpdatePetUseCase {
 
     const receivedPhotos = await Promise.all(
       photos.map(async (photo) => {
-        const fileClone = new PassThrough()
-        photo.file.pipe(fileClone)
-        const hash = await generateFileHash(fileClone)
-        return { hash, photo }
+        const chunks: Buffer[] = []
+
+        for await (const chunk of photo.file) {
+          chunks.push(chunk)
+        }
+
+        const buffer = Buffer.concat(chunks)
+        const hash = generateFileHash(buffer)
+        return { hash, photo, buffer }
       }),
     )
 
@@ -81,23 +75,21 @@ export class UpdatePetUseCase {
     try {
       await Promise.all(
         receivedPhotosToUpload.map(async (photoToUpload) => {
-          const { file, filename, mimetype } = photoToUpload.photo
+          const { filename, mimetype } = photoToUpload.photo
 
-          const fileClone = new PassThrough()
-          file.pipe(fileClone)
-
-          const { fileUrl } = await this.fileStorageProvider.upload(
+          const { fileUrl, fileKey } = await this.fileStorageProvider.upload(
             id,
-            fileClone,
+            photoToUpload.buffer,
             filename,
             mimetype,
           )
 
-          if (!fileUrl) {
+          if (!fileUrl || !fileKey) {
             throw new UploadPhotoError()
           }
 
           photosToUpload.push({
+            key: fileKey,
             url: fileUrl,
             hash: photoToUpload.hash,
             pet_id: id,
@@ -121,8 +113,7 @@ export class UpdatePetUseCase {
     try {
       await Promise.all(
         receivedPhotosToRemove.map(async (photoToRemove) => {
-          const key = photoToRemove.url.split('/').pop() ?? ''
-          await this.fileStorageProvider.remove(key)
+          await this.fileStorageProvider.remove(photoToRemove.key)
           photosToRemoveId.push(photoToRemove.id)
         }),
       )
