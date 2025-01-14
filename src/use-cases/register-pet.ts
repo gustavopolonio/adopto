@@ -55,20 +55,21 @@ export class RegisterPetUseCase {
 
           const buffer = Buffer.concat(chunks)
 
-          const { fileUrl } = await this.fileStorageProvider.upload(
+          const { fileUrl, fileKey } = await this.fileStorageProvider.upload(
             petId,
             buffer,
             filename,
             mimetype,
           )
 
-          if (!fileUrl) {
+          if (!fileUrl || !fileKey) {
             throw new UploadPhotoError()
           }
 
           const hash = generateFileHash(buffer)
 
           photosToUpload.push({
+            key: fileKey,
             url: fileUrl,
             hash,
             pet_id: petId,
