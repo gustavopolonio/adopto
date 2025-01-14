@@ -39,6 +39,7 @@ describe('Delete pet use case', () => {
 
     await sut.execute({
       id: pet.id,
+      orgId: org.id,
     })
 
     expect(petsRepository.pets[0].deleted_at).not.toBeNull()
@@ -48,6 +49,7 @@ describe('Delete pet use case', () => {
     await expect(
       sut.execute({
         id: 'non-existing-id',
+        orgId: 'non-existing-id',
       }),
     ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
