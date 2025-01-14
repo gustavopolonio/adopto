@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream'
 import { DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { s3Client } from '@/lib/aws-s3'
@@ -8,7 +7,7 @@ import { FileStorageProvider } from '../file-storage-provider'
 export class S3FileStorageProvider implements FileStorageProvider {
   async upload(
     petId: string,
-    file: Readable,
+    file: Buffer,
     filename: string,
     mimetype: string,
   ) {
@@ -25,12 +24,17 @@ export class S3FileStorageProvider implements FileStorageProvider {
     const uploadedFile = await upload.done()
 
     let fileUrl = null
+    let fileKey = null
 
     if (uploadedFile.Location) {
       fileUrl = uploadedFile.Location
     }
 
-    return { fileUrl }
+    if (uploadedFile.Key) {
+      fileKey = uploadedFile.Key
+    }
+
+    return { fileUrl, fileKey }
   }
 
   async remove(key: string) {
