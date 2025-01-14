@@ -4,6 +4,7 @@ import { InMemoryPetsRepository } from '@/repositories/in-memory/in-memory-pets-
 import { InMemoryOrgsRepository } from '@/repositories/in-memory/in-memory-orgs-repository'
 import { DeletePetUseCase } from './delete-pet'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
+import { UnauthorizedError } from './errors/unauthorized.error'
 
 let orgsRepository: InMemoryOrgsRepository
 let petsRepository: InMemoryPetsRepository
@@ -52,5 +53,34 @@ describe('Delete pet use case', () => {
         orgId: 'non-existing-id',
       }),
     ).rejects.toBeInstanceOf(ResourceNotFoundError)
+  })
+
+  it('should not be able an org delete a pet of another org', async () => {
+    const org = await orgsRepository.create({
+      name: 'Org 1',
+      email: 'org1@test.test',
+      password_hash: await hash('123456', 6),
+      zip_code: '13566-583',
+      address: 'Rua Tomaz Antonio Gonzaga, 382',
+      city: 'São Carlos',
+      whatsapp: '16 99399-0990',
+    })
+
+    const pet = await petsRepository.create({
+      org_id: 'non-existing-id',
+      name: 'Pet 1',
+      description: 'Description 1',
+      age_in_months: 12,
+      size: 'MEDIUM',
+      energy_level: 'HIGH',
+      adoption_requirements: ['Requirement 1'],
+    })
+
+    await expect(
+      sut.execute({
+        id: pet.id,
+        orgId: org.id,
+      }),
+    ).rejects.toBeInstanceOf(UnauthorizedError)
   })
 })
