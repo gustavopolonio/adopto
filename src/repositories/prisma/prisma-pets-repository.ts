@@ -9,6 +9,13 @@ export class PrismaPetsRepository implements PetsRepository {
         id,
         deleted_at: null,
       },
+      include: {
+        photos: {
+          select: {
+            url: true,
+          },
+        },
+      },
     })
 
     return pet
