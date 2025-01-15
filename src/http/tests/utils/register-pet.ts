@@ -18,7 +18,6 @@ export async function registerPet(
     energyLevel: 'MEDIUM',
     photos: [photo1, photo2],
     adoptionRequirements: [],
-    orgId: '',
   }
 
   const petData = { ...defaultData, ...customData }
