@@ -7,8 +7,8 @@ export async function listByCity(request: FastifyRequest, reply: FastifyReply) {
     city: z.string(),
     page: z.coerce.number().min(1).default(1),
     sortBy: z.enum(['mostRecent']).optional(),
-    minAge: z.coerce.number().int(),
-    maxAge: z.coerce.number().int(),
+    minAge: z.coerce.number().int().default(0),
+    maxAge: z.coerce.number().int().default(240), // 240 months = 20 years
     size: z.enum(['SMALL', 'MEDIUM', 'LARGE']).optional(),
     energyLevel: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
   })

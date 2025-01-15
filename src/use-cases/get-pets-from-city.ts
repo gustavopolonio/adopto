@@ -24,7 +24,7 @@ export class GetPetsFromCityUseCase {
     city,
     page,
     sortBy,
-    ageInMonths = { min: 0, max: 240 }, // 240 months = 20 years
+    ageInMonths,
     size,
     energyLevel,
   }: GetPetsFromCityUseCaseRequest): Promise<GetPetsFromCityUseCaseResponse> {
