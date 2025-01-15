@@ -7,7 +7,7 @@ import { registerOrg } from '@/http/tests/utils/register-org'
 import { registerPet } from '@/http/tests/utils/register-pet'
 import { authenticateAsOrg } from '@/http/tests/utils/authenticate-as-org'
 
-describe('Register pet (e2e)', () => {
+describe('Update pet (e2e)', () => {
   beforeAll(async () => {
     await app.ready()
   })
@@ -16,7 +16,7 @@ describe('Register pet (e2e)', () => {
     await app.close()
   })
 
-  it('should be able to register a pet', async () => {
+  it('should be able to update a pet', async () => {
     await registerOrg()
     const { token } = await authenticateAsOrg()
     await registerPet(token)
