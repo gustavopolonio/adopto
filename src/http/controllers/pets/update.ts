@@ -6,6 +6,7 @@ import { makeUpdatePetUseCase } from '@/use-cases/factories/make-update-pet-use-
 import { ResourceNotFoundError } from '@/use-cases/errors/resource-not-found-error'
 import { UploadPhotoError } from '@/use-cases/errors/upload-photo-error'
 import { RemovePhotoError } from '@/use-cases/errors/remove-photo-error'
+import { UnauthorizedError } from '@/use-cases/errors/unauthorized.error'
 import {
   PetPhoto,
   UpdatePetInputKeys,
@@ -116,6 +117,10 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
       error instanceof RemovePhotoError
     ) {
       return reply.status(400).send({ message: error.message })
+    }
+
+    if (error instanceof UnauthorizedError) {
+      return reply.status(401).send({ message: error.message })
     }
 
     throw error

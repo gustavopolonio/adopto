@@ -8,6 +8,7 @@ import { UpdatePetInput } from '@/@types/pets'
 import { FileStorageProvider } from '@/providers/file-storage/file-storage-provider'
 import { UploadPhotoError } from './errors/upload-photo-error'
 import { RemovePhotoError } from './errors/remove-photo-error'
+import { UnauthorizedError } from './errors/unauthorized.error'
 
 interface UpdatePetUseCaseRequest extends UpdatePetInput {}
 
@@ -44,6 +45,10 @@ export class UpdatePetUseCase {
 
     if (!org) {
       throw new ResourceNotFoundError()
+    }
+
+    if (pet.org_id !== orgId) {
+      throw new UnauthorizedError()
     }
 
     const existingPhotos = await this.photosRepository.getManyByPetId(pet.id)
