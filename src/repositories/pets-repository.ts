@@ -1,7 +1,7 @@
 import { EnergyLevel, Pet, Prisma, Size } from '@prisma/client'
 
 export interface PetsRepository {
-  findById(id: string): Promise<Pet | null>
+  findById(id: string, includePhotos?: boolean): Promise<Pet | null>
   findManyByCity(
     city: string,
     page: number,

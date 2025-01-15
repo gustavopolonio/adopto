@@ -3,19 +3,21 @@ import { PetsRepository } from '../pets-repository'
 import { prisma } from '@/lib/prisma'
 
 export class PrismaPetsRepository implements PetsRepository {
-  async findById(id: string) {
+  async findById(id: string, includePhotos = false) {
     const pet = await prisma.pet.findUnique({
       where: {
         id,
         deleted_at: null,
       },
-      include: {
-        photos: {
-          select: {
-            url: true,
-          },
-        },
-      },
+      include: includePhotos
+        ? {
+            photos: {
+              select: {
+                url: true,
+              },
+            },
+          }
+        : undefined,
     })
 
     return pet
@@ -58,6 +60,13 @@ export class PrismaPetsRepository implements PetsRepository {
           created_at: 'desc',
         },
       }),
+      include: {
+        photos: {
+          select: {
+            url: true,
+          },
+        },
+      },
       take: 20,
       skip: (page - 1) * 20,
     })
