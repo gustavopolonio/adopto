@@ -44,7 +44,7 @@ export class PrismaOrgsRepository implements OrgsRepository {
     return org
   }
 
-  async delete(id: string) {
+  async softDelete(id: string) {
     await prisma.org.update({
       where: {
         id,

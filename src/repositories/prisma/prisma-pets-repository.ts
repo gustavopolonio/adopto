@@ -105,7 +105,7 @@ export class PrismaPetsRepository implements PetsRepository {
     return pet
   }
 
-  async delete(id: string) {
+  async softDelete(id: string) {
     await prisma.pet.update({
       where: {
         id,
@@ -116,7 +116,7 @@ export class PrismaPetsRepository implements PetsRepository {
     })
   }
 
-  async deleteManyByOrgId(orgId: string) {
+  async softDeleteManyByOrgId(orgId: string) {
     await prisma.pet.updateMany({
       where: {
         org_id: orgId,

@@ -29,7 +29,7 @@ export class DeletePetUseCase {
       throw new UnauthorizedError()
     }
 
-    await this.petsRepository.delete(id)
+    await this.petsRepository.softDelete(id)
 
     return { pet }
   }

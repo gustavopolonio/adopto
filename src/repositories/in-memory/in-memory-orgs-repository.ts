@@ -55,7 +55,7 @@ export class InMemoryOrgsRepository implements OrgsRepository {
     return org
   }
 
-  async delete(id: string) {
+  async softDelete(id: string) {
     const orgIndex = this.orgs.findIndex((orgItem) => orgItem.id === id)
 
     if (orgIndex >= 0) {

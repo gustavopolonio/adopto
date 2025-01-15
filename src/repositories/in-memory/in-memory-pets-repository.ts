@@ -106,7 +106,7 @@ export class InMemoryPetsRepository implements PetsRepository {
     return pet
   }
 
-  async delete(id: string) {
+  async softDelete(id: string) {
     const petIndex = this.pets.findIndex((petItem) => petItem.id === id)
 
     if (petIndex >= 0) {
@@ -114,7 +114,7 @@ export class InMemoryPetsRepository implements PetsRepository {
     }
   }
 
-  async deleteManyByOrgId(orgId: string) {
+  async softDeleteManyByOrgId(orgId: string) {
     this.pets.forEach((pet, index) => {
       if (pet.org_id === orgId) {
         this.pets[index].deleted_at = new Date()

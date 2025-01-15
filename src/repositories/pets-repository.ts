@@ -21,6 +21,6 @@ export interface PetsRepository {
   ): Promise<Pet[]>
   create(data: Prisma.PetUncheckedCreateInput): Promise<Pet>
   save(pet: Pet): Promise<Pet>
-  delete(id: string): Promise<void>
-  deleteManyByOrgId(orgId: string): Promise<void>
+  softDelete(id: string): Promise<void>
+  softDeleteManyByOrgId(orgId: string): Promise<void>
 }

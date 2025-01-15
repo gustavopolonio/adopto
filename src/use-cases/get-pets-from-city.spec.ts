@@ -64,7 +64,7 @@ describe('Get pets from city use case', () => {
       adoption_requirements: ['Requirement 1'],
     })
 
-    await petsRepository.delete(petToDelete.id)
+    await petsRepository.softDelete(petToDelete.id)
 
     const secondOrg = await orgsRepository.create({
       name: 'Org 2',

@@ -26,8 +26,8 @@ export class DeleteOrgUseCase {
       throw new ResourceNotFoundError()
     }
 
-    await this.orgsRepository.delete(id)
-    await this.petsRepository.deleteManyByOrgId(id)
+    await this.orgsRepository.softDelete(id)
+    await this.petsRepository.softDeleteManyByOrgId(id)
 
     return { org }
   }
