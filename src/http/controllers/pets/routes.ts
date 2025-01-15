@@ -4,9 +4,11 @@ import { register } from './register'
 import { update } from './update'
 import { profile } from './profile'
 import { remove } from './remove'
+import { listByCity } from './list-by-city'
 
 export async function petsRoutes(app: FastifyInstance) {
   app.get('/pets/:petId', profile)
+  app.get('/pets', listByCity)
 
   // Authenticated
   app.post('/pets', { onRequest: [verifyJwt] }, register)
