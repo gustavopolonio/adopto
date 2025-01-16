@@ -34,7 +34,7 @@ app.setErrorHandler((error, _, reply) => {
   // Handling files too large
   if (error.code === 'FST_REQ_FILE_TOO_LARGE') {
     return reply.status(413).send({
-      message: 'File size limit reached',
+      message: `File size limit reached. Max: ${MAX_FILE_SIZE} bytes`,
     })
   }
 

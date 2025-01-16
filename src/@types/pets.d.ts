@@ -1,11 +1,9 @@
-import { Readable } from 'node:stream'
-
 export type EnergyLevel = 'MEDIUM' | 'LOW' | 'HIGH'
 
 export type Size = 'MEDIUM' | 'SMALL' | 'LARGE'
 
 interface PetPhoto {
-  file: Readable
+  buffer: Buffer
   filename: string
   mimetype: string
 }

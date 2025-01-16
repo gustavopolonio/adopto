@@ -55,15 +55,8 @@ export class UpdatePetUseCase {
 
     const receivedPhotos = await Promise.all(
       photos.map(async (photo) => {
-        const chunks: Buffer[] = []
-
-        for await (const chunk of photo.file) {
-          chunks.push(chunk)
-        }
-
-        const buffer = Buffer.concat(chunks)
-        const hash = generateFileHash(buffer)
-        return { hash, photo, buffer }
+        const hash = generateFileHash(photo.buffer)
+        return { hash, photo }
       }),
     )
 
@@ -84,7 +77,7 @@ export class UpdatePetUseCase {
 
           const { fileUrl, fileKey } = await this.fileStorageProvider.upload(
             id,
-            photoToUpload.buffer,
+            photoToUpload.photo.buffer,
             filename,
             mimetype,
           )
