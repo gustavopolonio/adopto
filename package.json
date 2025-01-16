@@ -7,7 +7,8 @@
     "dev": "tsx watch src/server.ts",
     "test": "vitest run --dir src/use-cases",
     "test:watch": "vitest --dir src/use-cases",
-    "test:e2e": "vitest run --dir src/http"
+    "test:e2e": "vitest run --dir src/http",
+    "lint": "eslint . --ext .js,.ts"
   },
   "license": "MIT",
   "dependencies": {
@@ -33,7 +34,7 @@
     "prisma": "6.1.0",
     "supertest": "7.0.0",
     "tsx": "4.19.2",
-    "typescript": "5.7.2",
+    "typescript": "5.3.2",
     "vitest": "2.1.8"
   }
 }
