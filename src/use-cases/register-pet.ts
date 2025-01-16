@@ -45,15 +45,7 @@ export class RegisterPetUseCase {
     try {
       await Promise.all(
         photos.map(async (photo) => {
-          const { file, filename, mimetype } = photo
-
-          const chunks: Buffer[] = []
-
-          for await (const chunk of file) {
-            chunks.push(chunk)
-          }
-
-          const buffer = Buffer.concat(chunks)
+          const { buffer, filename, mimetype } = photo
 
           const { fileUrl, fileKey } = await this.fileStorageProvider.upload(
             petId,

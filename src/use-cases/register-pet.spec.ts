@@ -12,17 +12,17 @@ import { PetPhoto } from '@/@types/pets'
 
 const mockedPhotos: PetPhoto[] = [
   {
-    file: createDummyFile(),
+    buffer: createDummyFile(),
     filename: 'photo1.jpg',
     mimetype: 'image/jpeg',
   },
   {
-    file: createDummyFile(),
+    buffer: createDummyFile(),
     filename: 'photo2.jpg',
     mimetype: 'image/jpg',
   },
   {
-    file: createDummyFile('dummy data 3'),
+    buffer: createDummyFile('dummy data 3'),
     filename: 'photo3.jpg',
     mimetype: 'image/png',
   },

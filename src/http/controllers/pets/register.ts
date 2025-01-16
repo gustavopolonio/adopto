@@ -1,9 +1,9 @@
-import { Readable } from 'node:stream'
 import { z } from 'zod'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { makeRegisterPetUseCase } from '@/use-cases/factories/make-register-pet-use-case'
 import { ResourceNotFoundError } from '@/use-cases/errors/resource-not-found-error'
 import { UploadPhotoError } from '@/use-cases/errors/upload-photo-error'
+import { convertReadableToBuffer } from '@/utils/convert-readable-to-buffer'
 import { MAX_FILE_SIZE } from '@/utils/constants'
 import {
   PetPhoto,
@@ -12,7 +12,11 @@ import {
 } from '@/@types/pets'
 
 const fileSchema = z.object({
-  file: z.instanceof(Readable),
+  buffer: z
+    .instanceof(Buffer)
+    .refine((buffer) => buffer.length <= MAX_FILE_SIZE, {
+      message: 'File size limit reached 1111',
+    }),
   filename: z.string(),
   mimetype: z.string().refine((type) => {
     return ['image/jpeg', 'image/jpg', 'image/png'].includes(type)
@@ -41,32 +45,13 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
   for await (const part of parts) {
     if (part.type === 'file') {
-      let fileSize = 0
-      const chunks: Buffer[] = []
+      const buffer = await convertReadableToBuffer(part.file)
 
-      await new Promise<void>((resolve, reject) => {
-        part.file.on('data', (chunk: Buffer) => {
-          fileSize += chunk.length
-
-          if (fileSize > MAX_FILE_SIZE) {
-            part.file.destroy()
-          } else {
-            chunks.push(chunk)
-          }
-        })
-
-        part.file.on('end', resolve)
-        part.file.on('error', reject)
+      photos.push({
+        buffer,
+        filename: part.filename,
+        mimetype: part.mimetype,
       })
-
-      if (fileSize <= MAX_FILE_SIZE) {
-        const fileBuffer = Buffer.concat(chunks)
-        photos.push({
-          file: Readable.from(fileBuffer),
-          filename: part.filename,
-          mimetype: part.mimetype,
-        })
-      }
     } else {
       const fieldName = part.fieldname as RegisterPetInputKeys
       const value = part.value as RegisterPetInputValues
