@@ -45,14 +45,24 @@ export class PrismaPetsRepository implements PetsRepository {
       energyLevel?: EnergyLevel
     },
   ) {
+    const petIdsFromCitiesThatMatch = await prisma.$queryRaw<{ id: string }[]>(
+      Prisma.sql`
+        SELECT p.id 
+        FROM "pets" p
+        JOIN "orgs" o ON p.org_id = o.id
+        WHERE p."deleted_at" IS NULL
+        AND unaccent(o."city") ILIKE unaccent(${city})
+      `,
+    )
+
+    const petIds = petIdsFromCitiesThatMatch.map((pet) => pet.id)
+
+    if (petIds.length === 0) return []
+
     const pets = await prisma.pet.findMany({
       where: {
-        deleted_at: null,
-        org: {
-          city: {
-            equals: city,
-            mode: 'insensitive',
-          },
+        id: {
+          in: petIds,
         },
         ...(filters?.ageInMonths && {
           age_in_months: {

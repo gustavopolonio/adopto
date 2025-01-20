@@ -7,3 +7,5 @@ services:
       POSTGRESQL_DATABASE: 'apiadopto'
       POSTGRESQL_USERNAME: 'docker'
       POSTGRESQL_PASSWORD: 'docker'
+    volumes:
+      - ./initPostgreDb.sql:/docker-entrypoint-initdb.d/initPostgreDb.sql
