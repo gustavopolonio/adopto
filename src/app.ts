@@ -1,5 +1,6 @@
 import fastify from 'fastify'
 import fastifyJwt from '@fastify/jwt'
+import fastifyCookie from '@fastify/cookie'
 import fastifyMultipart from '@fastify/multipart'
 import { ZodError } from 'zod'
 import { env } from './env'
@@ -11,6 +12,13 @@ export const app = fastify()
 
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
+  cookie: {
+    cookieName: 'refreshToken',
+    signed: false,
+  },
+  sign: {
+    expiresIn: '10m',
+  },
 })
 
 app.register(fastifyMultipart, {
@@ -19,6 +27,8 @@ app.register(fastifyMultipart, {
     fileSize: MAX_FILE_SIZE,
   },
 })
+
+app.register(fastifyCookie)
 
 app.register(orgsRoutes)
 app.register(petsRoutes)
