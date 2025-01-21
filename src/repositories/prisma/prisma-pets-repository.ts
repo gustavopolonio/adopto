@@ -51,7 +51,7 @@ export class PrismaPetsRepository implements PetsRepository {
         FROM "pets" p
         JOIN "orgs" o ON p.org_id = o.id
         WHERE p."deleted_at" IS NULL
-        AND unaccent(o."city") ILIKE unaccent(${city})
+        AND "public".unaccent(o."city") ILIKE "public".unaccent(${city})
       `,
     )
 
