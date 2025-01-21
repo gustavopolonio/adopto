@@ -17,3 +17,8 @@ jobs:
       - run: npm run test
         env:
           GOOGLE_MAPS_API_KEY: ${{secrets.GOOGLE_MAPS_API_KEY}}
+          DATABASE_URL: ${{secrets.DATABASE_URL}}
+          AWS_ACCESS_KEY: ${{secrets.AWS_ACCESS_KEY}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          BUCKET_NAME: ${{secrets.BUCKET_NAME}}
+          JWT_SECRET: ${{secrets.JWT_SECRET}}
