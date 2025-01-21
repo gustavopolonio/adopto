@@ -17,7 +17,7 @@ jobs:
           POSTGRESQL_USERNAME: docker
           POSTGRESQL_PASSWORD: docker
         volumes:
-          - ./initPostgreDb.sql:/docker-entrypoint-initdb.d/initPostgreDb.sql
+          - ../../initPostgreDb.sql:/docker-entrypoint-initdb.d/initPostgreDb.sql
     
     steps:
       - uses: actions/checkout@v4
