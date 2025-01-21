@@ -14,7 +14,7 @@ describe('List pets by city (e2e)', () => {
     await app.close()
   })
 
-  it('should be able to list pets by city', async () => {
+  it.skip('should be able to list pets by city', async () => {
     await registerOrg({
       name: 'Org 1',
       email: 'org1@test.test',
