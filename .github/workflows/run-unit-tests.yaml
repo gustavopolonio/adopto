@@ -16,4 +16,9 @@ jobs:
       - run: npm ci
       - run: npm run test
         env:
-          GOOGLE_MAPS_API_KEY: AIzaSyAYRcaB9VINQl1u8uXzrN1CPRfhAu4AN3g
+          GOOGLE_MAPS_API_KEY: 123
+          DATABASE_URL: "postgresql://docker:docker@localhost:5432/apiadopto?schema=public"
+          AWS_ACCESS_KEY: 123
+          AWS_SECRET_ACCESS_KEY: 123
+          BUCKET_NAME: 123
+          JWT_SECRET: 123
