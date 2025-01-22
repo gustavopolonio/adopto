@@ -30,6 +30,7 @@ Animal adoption app
 - [x] if no filters are provided, the app should list all pets for the specified city
 - [x] the app does not handle the adoption process itself but provides a way for adopters to contact ORGs via WhatsApp
 - [x] the detailed pet page must have the location with a pin in the map - getPetProfile must return latitude and longitude
+- [ ] an ORG must verify its email before registering pets
 
 
 ## Non functional requirements
@@ -42,3 +43,5 @@ Animal adoption app
 - [x] supported pet photos formats: JPEG (.jpg/.jpeg) and .png
 - [x] ORG must be identified by a JWT (expiration 10 min) and refresh token (expiration 7 days)
 - [ ] compress pet photo before send to S3
+- [ ] listByCity e2e test is not working on ci => findManyByCity prisma method can't consider accents on the query. It's not creating correctly unaccent EXTENSION
+- [ ] the app should handle up to 10,000 concurrent requests without significant performance degradation
